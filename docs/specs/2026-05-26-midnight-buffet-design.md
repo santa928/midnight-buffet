@@ -3,6 +3,7 @@
 - 作成日: 2026-05-26
 - 対象: GitHub Pages で公開する初期版
 - 次期構想: Vercel + Supabase による合言葉ルーム型オンライン対応
+- 次期仕様: [`2026-05-27-midnight-buffet-online-design.md`](./2026-05-27-midnight-buffet-online-design.md)
 - ステータス: ユーザー承認済み（実装計画へ移行）
 
 ## 1. 目的
