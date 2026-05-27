@@ -16,3 +16,10 @@ export function readSupabasePublicConfig(
 
   return { url, publishableKey };
 }
+
+/** Creates the SDK client only when a player actually enters online mode. */
+export async function createBrowserSupabaseClient() {
+  const { createClient } = await import("@supabase/supabase-js");
+  const config = readSupabasePublicConfig(import.meta.env);
+  return createClient(config.url, config.publishableKey);
+}
