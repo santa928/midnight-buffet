@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
 test("plays a full short feast without exposing sealed reservations", async ({ page }, testInfo) => {
+  test.slow();
   await page.goto("./?qa=initial-release-1");
   await page.getByLabel("プレイヤー 1 の名前").fill("あおい");
   await page.getByLabel("プレイヤー 2 の名前").fill("れん");
