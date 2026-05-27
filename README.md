@@ -66,6 +66,12 @@ docker compose run --rm web npm run optimize:assets
 2. リポジトリの `Settings > Pages > Build and deployment > Source` を `GitHub Actions` に設定します。
 3. `Deploy GitHub Pages` workflow の成功後、表示された公開 URL でスマートフォン表示を確認します。
 
+公開後の実配信確認は、Pages URL を指定して同じ実ブラウザ検証を実行します。
+
+```bash
+docker compose run --rm -e PLAYWRIGHT_BASE_URL=https://santa928.github.io/midnight-buffet/ e2e
+```
+
 ## ドキュメント
 
 - 設計仕様: [`docs/specs/2026-05-26-midnight-buffet-design.md`](docs/specs/2026-05-26-midnight-buffet-design.md)
