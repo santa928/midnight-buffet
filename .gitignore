@@ -8,5 +8,6 @@ test-results/
 .env
 .env.*
 !.env.sample
+supabase/.temp/
 docs/superpowers/
 progress.md

@@ -22,7 +22,7 @@
 - 音のオン/オフと演出軽減
 - 画像生成を基準にした宴会ホール、クロッシュ舞台、料理アート
 
-次期版では Vercel と Supabase を用い、合言葉で参加できるオンラインルーム、複数端末の秘密選択同期、再接続を実装する構想です。初期版にはバックエンド依存を含めず、`session-adapter` 境界を用意しています。
+オンライン版は Vercel と Supabase を用い、合言葉で参加できるルーム、複数端末の秘密選択同期、再接続を追加する実装を進めています。公開中の GitHub Pages 版は従来どおりバックエンドなしの1台遊びで動作します。
 
 ## 開発環境
 
@@ -34,6 +34,18 @@ docker compose up web
 ```
 
 ブラウザで `http://localhost:5173` を開きます。
+
+### オンライン版のローカル基盤
+
+ブラウザに埋め込む設定は `.env.sample` の `VITE_SUPABASE_URL` と `VITE_SUPABASE_PUBLISHABLE_KEY` のみです。`service_role` key や秘密鍵はクライアント設定へ追加しません。
+
+Supabase CLI は `docker compose build web` で生成したアプリイメージを `supabase-cli` サービスが再利用します。ローカル Supabase は Docker Engine を使用するため、CLI コンテナは Docker socket、host network、migration の参照パスが一致する同一絶対パスを利用します。
+
+```bash
+docker compose run --rm supabase-cli start
+docker compose run --rm supabase-cli db reset
+docker compose run --rm supabase-cli test db
+```
 
 ### 検証
 
@@ -76,4 +88,6 @@ docker compose run --rm -e PLAYWRIGHT_BASE_URL=https://santa928.github.io/midnig
 
 - 設計仕様: [`docs/specs/2026-05-26-midnight-buffet-design.md`](docs/specs/2026-05-26-midnight-buffet-design.md)
 - 実装計画: [`docs/plans/2026-05-26-midnight-buffet-initial-release.md`](docs/plans/2026-05-26-midnight-buffet-initial-release.md)
+- オンライン版設計仕様: [`docs/specs/2026-05-27-midnight-buffet-online-design.md`](docs/specs/2026-05-27-midnight-buffet-online-design.md)
+- オンライン版実装計画: [`docs/plans/2026-05-27-midnight-buffet-online-release.md`](docs/plans/2026-05-27-midnight-buffet-online-release.md)
 - 視覚基準: [`docs/design/midnight-buffet-visual-reference.md`](docs/design/midnight-buffet-visual-reference.md)
