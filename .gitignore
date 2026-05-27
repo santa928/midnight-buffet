@@ -1,0 +1,12 @@
+node_modules/
+dist/
+coverage/
+playwright-report/
+test-results/
+.worktrees/
+.DS_Store
+.env
+.env.*
+!.env.sample
+docs/superpowers/
+progress.md
