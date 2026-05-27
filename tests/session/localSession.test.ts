@@ -66,6 +66,23 @@ describe("local pass-and-play session", () => {
     expect(getPublicSnapshot(session).rankings?.map(({ rank }) => rank)).toEqual([1, 1]);
   });
 
+  it("finishes a full feast after fifteen revealed rounds", () => {
+    let session = createLocalSession({ mode: "full", names: ["あおい", "れん"], shuffle: ordered });
+
+    for (let round = 1; round <= 15; round += 1) {
+      session = sealCard(openCurrentHand(session), round);
+      session = sealCard(openCurrentHand(session), round);
+      session = revealRound(session);
+      if (round < 15) {
+        session = advanceRound(session);
+      }
+    }
+
+    expect(session.phase).toBe("finished");
+    expect(getPublicSnapshot(session).roundNumber).toBe(15);
+    expect(getPublicSnapshot(session).dishCount).toBe(15);
+  });
+
   it("resets hands, scores and private choices for a rematch", () => {
     let session = createLocalSession({ mode: "short", names: ["あおい", "れん"], shuffle: ordered });
     session = sealCard(openCurrentHand(session), 15);

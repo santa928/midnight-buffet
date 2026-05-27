@@ -12,4 +12,10 @@ describe("dish presentation catalog", () => {
       expect(dish.tone).toBe(points > 0 ? "delight" : "trouble");
     });
   });
+
+  it("keeps trouble-dish copy aligned with the transformed tart artwork", () => {
+    [-5, -4, -3, -2, -1].forEach((points) => {
+      expect(getDishPresentation(points).name).toContain("タルト");
+    });
+  });
 });

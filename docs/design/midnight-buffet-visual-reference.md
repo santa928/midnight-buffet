@@ -1,6 +1,6 @@
 # Midnight Buffet Visual Reference
 
-- Reference: `public/assets/concepts/midnight-buffet-mobile-reference.png`
+- Reference: `docs/design/assets/midnight-buffet-mobile-reference.png`
 - Generated source dimensions: `853x1844`
 - Target viewport: `390x844` portrait mobile
 - Status: Accepted baseline for initial UI implementation
@@ -43,7 +43,7 @@
 
 ## Assets
 
-- Keep this complete screen only as design evidence.
+- Keep this complete screen under `docs/` only as design evidence; do not ship it with the runtime assets.
 - Accepted stage background source: `assets/source/banquet-stage-source.png` (`853x1844`); shipping version is `public/assets/backgrounds/banquet-stage.webp`.
 - The accepted background already integrates the lifted cloche and empty serving platform; implementation overlays dish art rather than stacking a separate cloche asset.
 - Accepted positive dish source: `assets/source/jewel-strawberry-tart.png`; shipping version is `public/assets/dishes/jewel-strawberry-tart.webp`.

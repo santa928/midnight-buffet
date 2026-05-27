@@ -72,6 +72,30 @@ describe("offline banquet flow", () => {
     expect(screen.getByRole("button", { name: "音を出す" })).toBeVisible();
     expect(screen.getByRole("button", { name: "演出を戻す" })).toBeVisible();
   });
+
+  it("finishes a short feast and starts a rematch from the awards screen", async () => {
+    const user = userEvent.setup();
+    render(<App shuffle={ordered} />);
+    const names = screen.getAllByRole("textbox");
+    await user.type(names[0], "あおい");
+    await user.type(names[1], "れん");
+    await user.click(screen.getByRole("button", { name: "祝宴を始める" }));
+    vi.useFakeTimers();
+
+    for (let round = 0; round < 9; round += 1) {
+      selectForGuest(15 - round);
+      selectForGuest(1 + round);
+      fireEvent.click(screen.getByRole("button", { name: "クロッシュを開ける" }));
+      if (round < 8) {
+        fireEvent.click(screen.getByRole("button", { name: "次の皿へ" }));
+      }
+    }
+
+    expect(screen.getByText("あおい さんの勝利")).toBeVisible();
+    expect(screen.getByRole("button", { name: "もう一度乾杯" })).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "もう一度乾杯" }));
+    expect(screen.getByText("次は あおい さん")).toBeVisible();
+  }, 15_000);
 });
 
 function openHand(): void {
@@ -79,4 +103,10 @@ function openHand(): void {
   fireEvent.pointerDown(trigger);
   act(() => vi.advanceTimersByTime(500));
   fireEvent.pointerUp(trigger);
+}
+
+function selectForGuest(value: number): void {
+  openHand();
+  fireEvent.click(screen.getByRole("button", { name: `予約札 ${value}` }));
+  fireEvent.click(screen.getByRole("button", { name: "この札を封蝋する" }));
 }
