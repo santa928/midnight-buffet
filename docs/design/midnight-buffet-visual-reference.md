@@ -44,7 +44,10 @@
 ## Assets
 
 - Keep this complete screen only as design evidence.
-- Generate separable WebP shipping assets for the hall, stage, dishes and final celebration.
+- Accepted stage background source: `assets/source/banquet-stage-source.png` (`853x1844`); shipping version is `public/assets/backgrounds/banquet-stage.webp`.
+- The accepted background already integrates the lifted cloche and empty serving platform; implementation overlays dish art rather than stacking a separate cloche asset.
+- Accepted positive dish source: `assets/source/jewel-strawberry-tart.png`; shipping version is `public/assets/dishes/jewel-strawberry-tart.webp`.
+- Generate additional shipping assets for trouble dishes and final celebration as later visual enrichment, then optimize all source PNG files to WebP from the Docker-managed image conversion step.
 - Keep dynamic content in DOM overlays; generated assets provide texture, lighting and physical objects.
 
 ## Layout And Tokens
@@ -65,4 +68,3 @@
 - Confirm numerically that the card hand and CTA stay below the dish stage with at least `12px` safe gap.
 - Confirm the card hand, CTA and score rail stay within the viewport with at least `8px` inset.
 - Confirm labels remain readable with sound disabled and reduced motion enabled.
-

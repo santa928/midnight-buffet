@@ -111,10 +111,14 @@ export function rematchSession(
 
 /** Converts local state into the only shape available to shared UI scenes. */
 export function getPublicSnapshot(session: LocalSessionState): PublicSessionSnapshot {
+  const showingResolvedDish = session.phase === "revealed" || session.phase === "finished";
   const snapshot: PublicSessionSnapshot = {
     mode: session.game.mode,
     phase: session.phase,
-    roundNumber: Math.min(session.game.roundIndex + 1, session.game.dishes.length),
+    roundNumber: Math.min(
+      showingResolvedDish ? session.game.roundIndex : session.game.roundIndex + 1,
+      session.game.dishes.length,
+    ),
     dishCount: session.game.dishes.length,
     currentDish: session.game.currentDish,
     currentPlayerName:
@@ -147,4 +151,3 @@ function assertNames(names: string[]): void {
     throw new Error("名前は空欄なし・重複なしで入力してください");
   }
 }
-

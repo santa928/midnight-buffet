@@ -1,0 +1,462 @@
+:root {
+  --color-night: #081321;
+  --color-panel: rgba(9, 16, 31, 0.86);
+  --color-velvet: #541d2d;
+  --color-velvet-bright: #762e43;
+  --color-gold: #d7b56d;
+  --color-gold-light: #f4d891;
+  --color-text: #fbf2db;
+  --color-muted: #c8b995;
+  --color-positive: #f4cd72;
+  --color-negative: #ef7164;
+  --tap-min: 48px;
+  --radius-panel: 28px;
+  --radius-card: 18px;
+  --safe-gap: 12px;
+}
+
+.game-app {
+  position: relative;
+  min-height: 100svh;
+  max-width: 480px;
+  margin: 0 auto;
+  overflow: hidden;
+  background: var(--color-night);
+  color: var(--color-text);
+  box-shadow: 0 0 70px rgba(0, 0, 0, 0.7);
+}
+
+.banquet-background {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.hud {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: max(env(safe-area-inset-top), 10px) 12px 0;
+  padding: 8px;
+  border: 1px solid rgba(215, 181, 109, 0.65);
+  border-radius: 22px;
+  background: rgba(7, 14, 28, 0.82);
+  backdrop-filter: blur(8px);
+}
+
+.brand-mini {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  font-size: 0.7rem;
+}
+
+.brand-mini strong,
+.brand-mini span {
+  display: block;
+}
+
+.brand-emblem {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 35px;
+  height: 35px;
+  border: 1px solid var(--color-gold);
+  border-radius: 50%;
+  color: var(--color-gold);
+  font-family: Georgia, serif;
+}
+
+.round-label {
+  margin-top: 2px;
+  color: var(--color-muted);
+}
+
+.settings-controls {
+  display: flex;
+  gap: 5px;
+}
+
+.icon-control {
+  min-height: var(--tap-min);
+  padding: 0 9px;
+  border: 1px solid rgba(215, 181, 109, 0.55);
+  border-radius: 15px;
+  background: rgba(17, 25, 41, 0.92);
+  color: var(--color-text);
+  font-size: 0.7rem;
+}
+
+.scene-surface {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100svh - 70px);
+  padding: 12px max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom));
+}
+
+.title-block {
+  text-align: center;
+}
+
+.title-block p {
+  margin: 0;
+  color: var(--color-gold);
+  font-family: Georgia, serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.title-block h1 {
+  margin: 6px 0;
+  color: var(--color-gold-light);
+  font-family: Georgia, "Hiragino Mincho ProN", serif;
+  font-size: clamp(2rem, 10vw, 2.7rem);
+  letter-spacing: 0.08em;
+}
+
+.title-block span {
+  color: var(--color-muted);
+  font-size: 0.88rem;
+}
+
+.setup-panel,
+.handoff-panel,
+.results-panel {
+  margin-top: auto;
+  padding: 20px 16px 16px;
+  border: 1px solid rgba(215, 181, 109, 0.45);
+  border-radius: var(--radius-panel);
+  background: var(--color-panel);
+  backdrop-filter: blur(10px);
+}
+
+.setup-panel {
+  display: grid;
+  gap: 15px;
+}
+
+.mode-picker {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.mode-picker button,
+.guest-actions button,
+.secondary-action {
+  min-height: var(--tap-min);
+  border: 1px solid rgba(215, 181, 109, 0.4);
+  border-radius: 14px;
+  background: rgba(9, 16, 31, 0.7);
+  color: var(--color-text);
+}
+
+.mode-picker button.active {
+  border-color: var(--color-gold);
+  background: rgba(112, 72, 35, 0.52);
+  color: var(--color-gold-light);
+}
+
+.mode-picker small {
+  display: block;
+  margin-top: 3px;
+  color: var(--color-muted);
+}
+
+.section-label {
+  margin: 0 0 8px;
+  color: var(--color-gold);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+}
+
+.guest-list label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 7px;
+  font-size: 0.84rem;
+}
+
+.guest-list label span {
+  width: 42px;
+  color: var(--color-muted);
+}
+
+.guest-list input {
+  flex: 1;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid rgba(215, 181, 109, 0.4);
+  border-radius: 12px;
+  background: rgba(4, 10, 23, 0.8);
+  color: var(--color-text);
+}
+
+.guest-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.guest-actions button {
+  flex: 1;
+  font-size: 0.84rem;
+}
+
+.form-error {
+  margin: 0;
+  color: var(--color-negative);
+  font-size: 0.85rem;
+}
+
+.primary-action,
+.hold-action {
+  min-height: 56px;
+  width: 100%;
+  border: 1px solid #f2d592;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #8d602a, #e1bd68 45%, #9b672b);
+  color: #191222;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.primary-action:disabled {
+  opacity: 0.45;
+}
+
+.handoff-panel {
+  margin-block: auto;
+  padding: 42px 22px 24px;
+  text-align: center;
+  background:
+    linear-gradient(90deg, rgba(46, 8, 20, 0.95), rgba(97, 27, 43, 0.98), rgba(46, 8, 20, 0.95));
+}
+
+.handoff-panel h1 {
+  margin: 14px 0;
+  color: var(--color-gold-light);
+}
+
+.handoff-panel p:not(.section-label) {
+  margin: 0 0 26px;
+  color: var(--color-muted);
+}
+
+.dish-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: end;
+  min-height: clamp(300px, 46svh, 398px);
+  padding-bottom: 4px;
+  text-align: center;
+}
+
+.dish-art {
+  position: absolute;
+  top: clamp(164px, 23svh, 210px);
+  width: min(66vw, 290px);
+  filter: drop-shadow(0 18px 16px rgba(0, 0, 0, 0.45));
+}
+
+.dish-stage.trouble .dish-art {
+  filter: saturate(0.55) sepia(0.45) hue-rotate(325deg) drop-shadow(0 12px 20px rgba(151, 34, 21, 0.8));
+}
+
+.dish-copy {
+  position: relative;
+  z-index: 1;
+  width: min(94%, 350px);
+  padding: 8px 12px 10px;
+  border-radius: 18px;
+  background: rgba(8, 13, 27, 0.78);
+}
+
+.tone-label {
+  color: var(--color-gold);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+
+.trouble .tone-label,
+.trouble .dish-points {
+  color: var(--color-negative);
+}
+
+.dish-points {
+  display: block;
+  color: var(--color-positive);
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.dish-copy h2 {
+  margin: 4px 0 0;
+  font-size: 1rem;
+}
+
+.dish-copy p {
+  margin: 3px 0 0;
+  color: var(--color-muted);
+  font-size: 0.75rem;
+}
+
+.private-hand {
+  display: grid;
+  gap: 8px;
+  margin-top: var(--safe-gap);
+}
+
+.private-caption {
+  margin: 0;
+  color: var(--color-gold-light);
+  text-align: center;
+}
+
+.cards-scroll {
+  display: flex;
+  gap: 7px;
+  overflow-x: auto;
+  padding: 3px 1px 8px;
+  scrollbar-width: none;
+}
+
+.cards-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.reservation-card {
+  flex: 0 0 54px;
+  height: 78px;
+  border: 2px solid rgba(215, 181, 109, 0.78);
+  border-radius: var(--radius-card);
+  background: linear-gradient(150deg, #7c3249, #39121e);
+  color: var(--color-gold-light);
+  font-family: Georgia, serif;
+  font-size: 1.5rem;
+}
+
+.reservation-card.selected {
+  transform: translateY(-6px);
+  border-color: #fff0bc;
+  box-shadow: 0 0 16px rgba(226, 189, 105, 0.55);
+}
+
+.reveal-ready,
+.reveal-result {
+  display: grid;
+  gap: 10px;
+  margin-top: auto;
+  padding: 14px;
+  border-radius: var(--radius-panel);
+  background: var(--color-panel);
+  text-align: center;
+}
+
+.reveal-ready h1,
+.reveal-result h1,
+.results-panel h1 {
+  margin: 0;
+  color: var(--color-gold-light);
+  font-size: 1.22rem;
+}
+
+.revealed-cards {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.revealed-cards span {
+  display: grid;
+  place-items: center;
+  width: 47px;
+  height: 64px;
+  border: 1px solid var(--color-gold);
+  border-radius: 12px;
+  background: var(--color-velvet);
+  color: var(--color-gold-light);
+  font-family: Georgia, serif;
+  font-size: 1.25rem;
+}
+
+.revealed-cards span.collided {
+  border-color: #7b7c82;
+  background: #30333c;
+  color: #b3b4ba;
+  text-decoration: line-through;
+}
+
+.scoreboard {
+  display: grid;
+  gap: 5px;
+}
+
+.score-seat {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border: 1px solid rgba(215, 181, 109, 0.22);
+  border-radius: 12px;
+  background: rgba(8, 13, 27, 0.5);
+}
+
+.score-seat strong {
+  color: var(--color-gold-light);
+}
+
+.results-panel {
+  display: grid;
+  gap: 12px;
+  margin-block: auto 10px;
+  text-align: center;
+}
+
+.secondary-action {
+  color: var(--color-text);
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid #ffe59a;
+  outline-offset: 2px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.reduced-motion * {
+  animation-duration: 1ms !important;
+  transition-duration: 1ms !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reservation-card {
+    transition: none;
+  }
+}
+
+@media (min-height: 890px) {
+  .dish-stage {
+    min-height: 470px;
+  }
+}

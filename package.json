@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "preview": "vite preview --host 0.0.0.0"
+    "preview": "vite preview --host 0.0.0.0",
+    "optimize:assets": "node scripts/optimize-assets.mjs"
   },
   "dependencies": {
     "react": "^19.1.0",
@@ -31,10 +32,10 @@
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.1.0",
     "jsdom": "^26.1.0",
+    "sharp": "^0.34.2",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.32.1",
     "vite": "^6.1.0",
     "vitest": "^3.1.0"
   }
 }
-
