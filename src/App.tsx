@@ -1,91 +1,44 @@
-import { useState, type ReactElement } from "react";
-import { useCelebrationAudio } from "./audio/useCelebrationAudio";
+import { lazy, Suspense, useState, type ReactElement } from "react";
 import { Hud } from "./components/Hud";
-import type { GameMode } from "./domain/types";
-import { HandoffScene } from "./scenes/HandoffScene";
-import { ResultsScene } from "./scenes/ResultsScene";
-import { RevealScene } from "./scenes/RevealScene";
-import { SelectionScene } from "./scenes/SelectionScene";
-import { SetupScene } from "./scenes/SetupScene";
-import { createLocalSessionAdapter } from "./session/localSessionAdapter";
-import type {
-  DishShuffler,
-  PrivateTurnSnapshot,
-  PublicSessionSnapshot,
-  SessionAdapter,
-} from "./session/types";
+import { OfflineBanquet } from "./offline/OfflineBanquet";
+import { restoreOnlineRoomId } from "./online/roomStorage";
+import { hasSupabasePublicConfig } from "./online/supabasePublicConfig";
+import { PlayStyleScene } from "./scenes/PlayStyleScene";
+import type { DishShuffler } from "./session/types";
+import type { OnlineRoomGateway } from "./online/onlineRoomGateway";
 import "./styles/game.css";
+
+const OnlineBanquet = lazy(async () => {
+  const module = await import("./online/OnlineBanquet");
+  return { default: module.OnlineBanquet };
+});
 
 interface AppProps {
   shuffle?: DishShuffler;
+  onlineGatewayFactory?: () => Promise<OnlineRoomGateway>;
 }
 
-/** Coordinates the offline banquet scenes through the session adapter boundary. */
-export function App({ shuffle }: AppProps): ReactElement {
-  const [mode, setMode] = useState<GameMode>("short");
-  const [names, setNames] = useState(["", ""]);
-  const [error, setError] = useState<string>();
-  const [adapter, setAdapter] = useState<SessionAdapter>();
-  const [snapshot, setSnapshot] = useState<PublicSessionSnapshot>();
-  const [privateTurn, setPrivateTurn] = useState<PrivateTurnSnapshot>();
-  const [selectedBid, setSelectedBid] = useState<number>();
+type PlayStyle = "offline" | "online";
+
+/** Selects a banquet style while keeping the online SDK outside offline startup. */
+export function App({ shuffle, onlineGatewayFactory }: AppProps): ReactElement {
+  const rememberedOnlineRoomId = restoreOnlineRoomId(window.localStorage);
+  const onlineAvailable =
+    Boolean(onlineGatewayFactory) || Boolean(rememberedOnlineRoomId) || hasSupabasePublicConfig(import.meta.env);
+  const [playStyle, setPlayStyle] = useState<PlayStyle | undefined>(() => (rememberedOnlineRoomId ? "online" : undefined));
   const [muted, setMuted] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
-  const playSound = useCelebrationAudio(muted);
 
-  function startFeast(): void {
-    try {
-      const nextAdapter = createLocalSessionAdapter({ mode, names, shuffle });
-      setAdapter(nextAdapter);
-      setSnapshot(nextAdapter.getSnapshot());
-      setError(undefined);
-      playSound("bell");
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "祝宴を開始できません");
-    }
+  if (playStyle === "offline") {
+    return <OfflineBanquet onExit={() => setPlayStyle(undefined)} shuffle={shuffle} />;
   }
-
-  function openHand(): void {
-    if (!adapter) return;
-    setPrivateTurn(adapter.openCurrentHand());
-    setSnapshot(adapter.getSnapshot());
+  if (playStyle === "online") {
+    return (
+      <Suspense fallback={<LoadingOnlineBanquet />}>
+        <OnlineBanquet gatewayFactory={onlineGatewayFactory} onExit={() => setPlayStyle(undefined)} />
+      </Suspense>
+    );
   }
-
-  function sealSelectedCard(): void {
-    if (!adapter || selectedBid === undefined) return;
-    setSnapshot(adapter.sealCard(selectedBid));
-    setPrivateTurn(undefined);
-    setSelectedBid(undefined);
-    playSound("seal");
-  }
-
-  function reveal(): void {
-    if (!adapter) return;
-    const revealed = adapter.revealRound();
-    setSnapshot(revealed);
-    const hasCollision = (revealed.revealedOutcome?.collidedBids.length ?? 0) > 0;
-    playSound(hasCollision ? "collision" : "cloche");
-  }
-
-  function advance(): void {
-    if (!adapter) return;
-    setSnapshot(adapter.advanceRound());
-  }
-
-  function rematch(): void {
-    if (!adapter) return;
-    setSnapshot(adapter.rematch());
-    playSound("bell");
-  }
-
-  function resetSetup(): void {
-    setAdapter(undefined);
-    setSnapshot(undefined);
-    setPrivateTurn(undefined);
-    setSelectedBid(undefined);
-  }
-
-  const scene = snapshot?.phase;
 
   return (
     <main className={`game-app ${reducedMotion ? "reduced-motion" : ""}`}>
@@ -100,40 +53,33 @@ export function App({ shuffle }: AppProps): ReactElement {
         onToggleMotion={() => setReducedMotion((value) => !value)}
         onToggleMute={() => setMuted((value) => !value)}
         reducedMotion={reducedMotion}
-        snapshot={snapshot}
       />
       <div className="scene-surface">
-        {!snapshot && (
-          <SetupScene
-            error={error}
-            mode={mode}
-            names={names}
-            onAdd={() => setNames((values) => [...values, ""])}
-            onMode={setMode}
-            onName={(index, name) =>
-              setNames((values) => values.map((value, current) => (current === index ? name : value)))
-            }
-            onRemove={() => setNames((values) => values.slice(0, -1))}
-            onStart={startFeast}
-          />
-        )}
-        {snapshot && scene === "handoff" && snapshot.currentPlayerName && (
-          <HandoffScene onOpen={openHand} playerName={snapshot.currentPlayerName} />
-        )}
-        {snapshot && scene === "selecting" && privateTurn && (
-          <SelectionScene
-            onSeal={sealSelectedCard}
-            onSelect={setSelectedBid}
-            selectedBid={selectedBid}
-            turn={privateTurn}
-          />
-        )}
-        {snapshot && (scene === "reveal-ready" || scene === "revealed") && (
-          <RevealScene onAdvance={advance} onReveal={reveal} snapshot={snapshot} />
-        )}
-        {snapshot && scene === "finished" && (
-          <ResultsScene onRematch={rematch} onReset={resetSetup} snapshot={snapshot} />
-        )}
+        <PlayStyleScene
+          onlineAvailable={onlineAvailable}
+          onOffline={() => setPlayStyle("offline")}
+          onOnline={() => setPlayStyle("online")}
+        />
+      </div>
+    </main>
+  );
+}
+
+/** Keeps the invitation transition within the banquet visual frame. */
+function LoadingOnlineBanquet(): ReactElement {
+  return (
+    <main className="game-app">
+      <img
+        alt=""
+        aria-hidden="true"
+        className="banquet-background"
+        src={`${import.meta.env.BASE_URL}assets/backgrounds/banquet-stage.webp`}
+      />
+      <div className="scene-surface">
+        <section className="setup-panel reconnect-panel">
+          <p className="section-label">招待状を開封中</p>
+          <h1>オンライン祝宴へ向かっています</h1>
+        </section>
       </div>
     </main>
   );

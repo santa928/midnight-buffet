@@ -146,6 +146,50 @@
   gap: 15px;
 }
 
+.launch-panel {
+  gap: 22px;
+  padding-top: 28px;
+  background:
+    radial-gradient(circle at 50% 0, rgba(215, 181, 109, 0.14), transparent 38%),
+    linear-gradient(125deg, rgba(26, 16, 30, 0.96), rgba(70, 18, 35, 0.94), rgba(12, 19, 35, 0.96));
+}
+
+.style-actions {
+  display: grid;
+  gap: 10px;
+}
+
+.style-actions small {
+  display: block;
+  margin-top: 5px;
+  color: rgba(25, 18, 34, 0.72);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.invitation-action {
+  min-height: 62px;
+  width: 100%;
+  border: 1px solid rgba(242, 213, 146, 0.8);
+  border-radius: 18px;
+  background: linear-gradient(130deg, rgba(52, 16, 28, 0.95), rgba(122, 42, 59, 0.93));
+  color: var(--color-gold-light);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.invitation-action small {
+  color: var(--color-muted);
+}
+
+.invitation-action:disabled {
+  border-color: rgba(242, 213, 146, 0.32);
+  background: linear-gradient(130deg, rgba(52, 16, 28, 0.58), rgba(72, 48, 62, 0.58));
+  color: rgba(246, 231, 190, 0.72);
+  cursor: not-allowed;
+}
+
 .mode-picker {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -428,6 +472,171 @@
 
 .secondary-action {
   color: var(--color-text);
+}
+
+.online-panel {
+  display: grid;
+  gap: 12px;
+  margin-top: auto;
+  padding: 18px 16px 16px;
+  border: 1px solid rgba(215, 181, 109, 0.56);
+  border-radius: var(--radius-panel);
+  background:
+    radial-gradient(circle at 50% 0, rgba(215, 181, 109, 0.1), transparent 42%),
+    linear-gradient(115deg, rgba(39, 13, 24, 0.97), rgba(89, 24, 42, 0.96), rgba(14, 20, 34, 0.98));
+  backdrop-filter: blur(12px);
+}
+
+.online-panel:not(.results-panel) {
+  margin-bottom: 6px;
+}
+
+.online-panel h1 {
+  margin: 0;
+  color: var(--color-gold-light);
+  font-family: Georgia, "Hiragino Mincho ProN", serif;
+  text-align: center;
+}
+
+.online-entry-panel {
+  background:
+    radial-gradient(circle at 50% 4%, rgba(244, 216, 145, 0.12), transparent 32%),
+    linear-gradient(115deg, rgba(29, 15, 27, 0.97), rgba(82, 23, 42, 0.96), rgba(10, 18, 34, 0.98));
+}
+
+.online-field {
+  display: grid;
+  gap: 6px;
+  color: var(--color-muted);
+  font-size: 0.84rem;
+}
+
+.online-field input {
+  min-height: 46px;
+  padding: 0 12px;
+  border: 1px solid rgba(215, 181, 109, 0.5);
+  border-radius: 12px;
+  background: rgba(4, 10, 23, 0.78);
+  color: var(--color-text);
+  font-size: 1rem;
+}
+
+.privacy-caption,
+.waiting-caption {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.77rem;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.invitation-code {
+  display: grid;
+  gap: 5px;
+  padding: 10px;
+  border: 1px solid rgba(215, 181, 109, 0.46);
+  border-radius: 16px;
+  background: rgba(8, 13, 27, 0.48);
+  text-align: center;
+}
+
+.invitation-code span {
+  color: var(--color-muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+}
+
+.invitation-code strong {
+  color: var(--color-gold-light);
+  font-family: Georgia, serif;
+  font-size: clamp(1.45rem, 7vw, 1.8rem);
+  letter-spacing: 0.14em;
+}
+
+.lobby-members,
+.seal-members {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.lobby-member {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid rgba(215, 181, 109, 0.2);
+  border-radius: 12px;
+  background: rgba(8, 13, 27, 0.48);
+}
+
+.lobby-member span,
+.seal-member span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lobby-member small {
+  color: var(--color-gold);
+}
+
+.seal-status {
+  gap: 10px;
+}
+
+.seal-member {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  padding: 8px 9px;
+  border: 1px solid rgba(215, 181, 109, 0.18);
+  border-radius: 12px;
+  background: rgba(8, 13, 27, 0.44);
+  font-size: 0.8rem;
+}
+
+.seal-member strong {
+  color: var(--color-muted);
+  font-size: 0.72rem;
+}
+
+.seal-member.sealed strong {
+  color: var(--color-gold-light);
+}
+
+.online-error {
+  margin-top: 8px;
+  padding: 8px 11px;
+  border-radius: 12px;
+  background: rgba(40, 8, 14, 0.85);
+  text-align: center;
+}
+
+.reconnect-toast {
+  position: absolute;
+  top: 7px;
+  left: 50%;
+  z-index: 2;
+  margin: 0;
+  padding: 5px 12px;
+  border: 1px solid rgba(215, 181, 109, 0.5);
+  border-radius: 999px;
+  background: rgba(9, 16, 31, 0.92);
+  color: var(--color-gold-light);
+  font-size: 0.75rem;
+  transform: translateX(-50%);
+}
+
+.reconnect-panel {
+  margin-block: auto;
+  text-align: center;
+}
+
+.reconnect-panel h1 {
+  margin: 0;
+  color: var(--color-gold-light);
+  font-size: 1.2rem;
 }
 
 button:focus-visible,

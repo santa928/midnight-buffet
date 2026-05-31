@@ -1,6 +1,6 @@
 begin;
 
-select plan(17);
+select plan(19);
 
 insert into auth.users (id)
 values
@@ -80,6 +80,11 @@ select lives_ok(
   $$select public.start_banquet_room((select room_id from banquet_fixture))$$,
   'host starts the feast'
 );
+select is(
+  public.get_my_banquet_hand((select room_id from banquet_fixture)),
+  array[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+  'host opens only their available reservation cards after the feast starts'
+);
 update public.room_dishes
 set points = 4, dish_id = 'dish-plus-4'
 where room_id = (select room_id from banquet_fixture) and round_index = 0;
@@ -93,11 +98,11 @@ select throws_ok(
 );
 
 set local "request.jwt.claim.sub" = '00000000-0000-0000-0000-000000000001';
-do $$ begin perform public.seal_banquet_bid((select room_id from banquet_fixture), 15); end; $$;
+do $$ begin perform public.seal_banquet_bid((select room_id from banquet_fixture), 15, 0); end; $$;
 set local "request.jwt.claim.sub" = '00000000-0000-0000-0000-000000000002';
-do $$ begin perform public.seal_banquet_bid((select room_id from banquet_fixture), 15); end; $$;
+do $$ begin perform public.seal_banquet_bid((select room_id from banquet_fixture), 15, 0); end; $$;
 set local "request.jwt.claim.sub" = '00000000-0000-0000-0000-000000000003';
-do $$ begin perform public.seal_banquet_bid((select room_id from banquet_fixture), 12); end; $$;
+do $$ begin perform public.seal_banquet_bid((select room_id from banquet_fixture), 12, 0); end; $$;
 
 set local role authenticated;
 select is(
@@ -142,6 +147,12 @@ reset role;
 
 set local "request.jwt.claim.sub" = '00000000-0000-0000-0000-000000000001';
 do $$ begin perform public.advance_banquet_round((select room_id from banquet_fixture)); end; $$;
+select throws_ok(
+  $$select public.seal_banquet_bid((select room_id from banquet_fixture), 14, 0)$$,
+  'P0001',
+  '画面を更新してください',
+  'a stale dish screen cannot seal a reservation for the next dish'
+);
 select throws_ok(
   $$select public.seal_banquet_bid((select room_id from banquet_fixture), 15)$$,
   'P0001',

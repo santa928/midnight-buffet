@@ -3,6 +3,7 @@ import { expect, test, type Page } from "@playwright/test";
 test("plays a full short feast without exposing sealed reservations", async ({ page }, testInfo) => {
   test.slow();
   await page.goto("./?qa=initial-release-1");
+  await page.getByRole("button", { name: /この端末で遊ぶ/ }).click();
   await page.getByLabel("プレイヤー 1 の名前").fill("あおい");
   await page.getByLabel("プレイヤー 2 の名前").fill("れん");
   await page.getByRole("button", { name: "祝宴を始める" }).click();
@@ -35,6 +36,7 @@ test("plays a full short feast without exposing sealed reservations", async ({ p
 
 test("keeps the dish stage and private controls separated inside the viewport", async ({ page }, testInfo) => {
   await page.goto("./?qa=layout-check");
+  await page.getByRole("button", { name: /この端末で遊ぶ/ }).click();
   await page.getByLabel("プレイヤー 1 の名前").fill("あおい");
   await page.getByLabel("プレイヤー 2 の名前").fill("れん");
   await page.getByRole("button", { name: "祝宴を始める" }).click();

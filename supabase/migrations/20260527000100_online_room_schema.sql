@@ -72,6 +72,9 @@ create table public.room_round_results (
   primary key (room_id, round_index)
 );
 
+-- Realtime payload is only a refresh signal; clients retrieve a protected RPC snapshot.
+alter publication supabase_realtime add table public.rooms;
+
 create index room_members_user_id_idx on public.room_members (user_id);
 create index room_dishes_room_id_idx on public.room_dishes (room_id);
 create index room_bids_member_id_idx on public.room_bids (member_id);

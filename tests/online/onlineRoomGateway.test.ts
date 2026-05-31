@@ -54,23 +54,39 @@ describe("Supabase online room gateway", () => {
     expect(listener.mock.calls[0][0]).not.toHaveProperty("privateValuesFromOtherPlayers");
     unsubscribe();
   });
+
+  it("seals a card against its dish round instead of a shared room revision", async () => {
+    const port = createFakePort();
+    const gateway = createSupabaseOnlineRoomGateway(port);
+
+    await gateway.sealBid("room-1", 15, 2);
+
+    expect(port.requests[0]).toEqual({
+      functionName: "seal_banquet_bid",
+      args: { p_room_id: "room-1", p_bid_value: 15, p_expected_round_index: 2 },
+    });
+  });
 });
 
 interface FakePort extends SupabaseOnlinePort {
   calls: string[];
+  requests: Array<{ functionName: string; args?: Record<string, unknown> }>;
   emitChange?: () => Promise<void>;
 }
 
 function createFakePort(): FakePort {
   const calls: string[] = [];
+  const requests: Array<{ functionName: string; args?: Record<string, unknown> }> = [];
   let changeListener: (() => Promise<void>) | undefined;
   return {
     calls,
+    requests,
     async ensureAnonymousSession() {
       calls.push("signInAnonymously");
     },
-    async rpc(functionName) {
+    async rpc(functionName, args) {
       calls.push(functionName);
+      requests.push({ functionName, args });
       if (functionName === "create_banquet_room") {
         return { roomId: "room-1", inviteCode: "ABCD234567" };
       }

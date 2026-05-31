@@ -1,25 +1,13 @@
-export interface SupabasePublicConfig {
-  url: string;
-  publishableKey: string;
-}
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { readSupabasePublicConfig } from "./supabasePublicConfig";
 
-/** Reads the only Supabase values that may be embedded in a browser build. */
-export function readSupabasePublicConfig(
-  env: Record<string, string | boolean | undefined>,
-): SupabasePublicConfig {
-  const url = env.VITE_SUPABASE_URL;
-  const publishableKey = env.VITE_SUPABASE_PUBLISHABLE_KEY;
+let browserClientPromise: Promise<SupabaseClient> | undefined;
 
-  if (typeof url !== "string" || typeof publishableKey !== "string") {
-    throw new Error("オンライン祝宴の接続設定がありません");
-  }
-
-  return { url, publishableKey };
-}
-
-/** Creates the SDK client only when a player actually enters online mode. */
-export async function createBrowserSupabaseClient() {
-  const { createClient } = await import("@supabase/supabase-js");
-  const config = readSupabasePublicConfig(import.meta.env);
-  return createClient(config.url, config.publishableKey);
+/** Lazily creates one shared browser auth client after online mode is entered. */
+export function createBrowserSupabaseClient(): Promise<SupabaseClient> {
+  browserClientPromise ??= import("@supabase/supabase-js").then(({ createClient }) => {
+    const config = readSupabasePublicConfig(import.meta.env);
+    return createClient(config.url, config.publishableKey);
+  });
+  return browserClientPromise;
 }

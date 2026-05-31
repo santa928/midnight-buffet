@@ -1,6 +1,6 @@
 begin;
 
-select plan(16);
+select plan(17);
 
 select has_schema('private', 'private schema exists for invitation verifiers');
 select has_table('public', 'rooms', 'rooms table exists');
@@ -44,6 +44,14 @@ select has_function(
   'is_round_revealed',
   array['uuid', 'integer'],
   'round reveal helper exists'
+);
+select isnt_empty(
+  $$select 1
+      from pg_publication_tables
+      where pubname = 'supabase_realtime'
+        and schemaname = 'public'
+        and tablename = 'rooms'$$,
+  'room revisions are broadcast through Supabase Realtime'
 );
 
 select * from finish();

@@ -1,10 +1,9 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { BidValue, Dish, GameMode, RoundOutcome } from "../domain/types";
 import type { OnlineRoomGateway } from "./onlineRoomGateway";
+import { rememberOnlineRoom, restoreOnlineRoomId } from "./roomStorage";
 import { createBrowserSupabaseClient } from "./supabaseClient";
 import type { OnlineRoomMember, OnlineRoomSnapshot } from "./types";
-
-const roomStorageKey = "midnight-buffet.online-room-id";
 
 export interface SupabaseOnlinePort {
   ensureAnonymousSession(): Promise<void>;
@@ -113,8 +112,15 @@ export function createSupabaseOnlineRoomGateway(port: SupabaseOnlinePort): Onlin
         dish: snapshot.currentDish,
       };
     },
-    sealBid(roomId, bid) {
-      return runProgressRpc("seal_banquet_bid", roomId, { p_bid_value: bid });
+    async sealBid(roomId, bid, roundIndex) {
+      const raw = (await port.rpc("seal_banquet_bid", {
+        p_room_id: roomId,
+        p_bid_value: bid,
+        p_expected_round_index: roundIndex,
+      })) as RawSnapshot;
+      const snapshot = normalizeSnapshot(raw);
+      revisions.set(roomId, snapshot.revision);
+      return snapshot;
     },
     revealRound(roomId) {
       return runProgressRpc("reveal_banquet_round", roomId);
@@ -200,10 +206,10 @@ function createBrowserPort(client: SupabaseClient): SupabaseOnlinePort {
       return data;
     },
     rememberRoom(roomId) {
-      window.localStorage.setItem(roomStorageKey, roomId);
+      rememberOnlineRoom(window.localStorage, roomId);
     },
     restoreRoomId() {
-      return window.localStorage.getItem(roomStorageKey) ?? undefined;
+      return restoreOnlineRoomId(window.localStorage);
     },
     subscribe(roomId, onChange) {
       const channel = client

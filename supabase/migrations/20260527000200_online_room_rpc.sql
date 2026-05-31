@@ -100,15 +100,15 @@ security definer
 set search_path = ''
 as $$
 declare
-  member_id uuid;
+  current_member_id uuid;
   remaining_cards integer[];
 begin
-  select members.id into member_id
+  select members.id into current_member_id
   from public.room_members members
   where members.room_id = p_room_id
     and members.user_id = (select auth.uid());
 
-  if member_id is null then
+  if current_member_id is null then
     raise exception '祝宴へ入場していません';
   end if;
 
@@ -119,7 +119,7 @@ begin
     select 1
     from public.room_bids bids
     where bids.room_id = p_room_id
-      and bids.member_id = member_id
+      and bids.member_id = current_member_id
       and bids.bid_value = cards.card
   );
 
@@ -315,7 +315,7 @@ $$;
 create or replace function public.seal_banquet_bid(
   p_room_id uuid,
   p_bid_value integer,
-  p_expected_revision integer default null
+  p_expected_round_index integer default null
 ) returns jsonb
 language plpgsql
 security definer
@@ -329,7 +329,7 @@ begin
   if not found or target_room.expires_at <= now() or target_room.phase <> 'selecting' then
     raise exception '現在は封蝋できません';
   end if;
-  if p_expected_revision is not null and p_expected_revision <> target_room.revision then
+  if p_expected_round_index is not null and p_expected_round_index <> target_room.round_index then
     raise exception '画面を更新してください';
   end if;
 

@@ -221,7 +221,7 @@ export type Database = {
       seal_banquet_bid: {
         Args: {
           p_bid_value: number
-          p_expected_revision?: number
+          p_expected_round_index?: number
           p_room_id: string
         }
         Returns: Json

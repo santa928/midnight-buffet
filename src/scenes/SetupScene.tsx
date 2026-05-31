@@ -10,6 +10,7 @@ interface SetupSceneProps {
   onAdd: () => void;
   onRemove: () => void;
   onStart: () => void;
+  onBack?: () => void;
 }
 
 /** Collects the guest list and selected feast duration. */
@@ -22,6 +23,7 @@ export function SetupScene({
   onAdd,
   onRemove,
   onStart,
+  onBack,
 }: SetupSceneProps): ReactElement {
   return (
     <section className="setup-panel">
@@ -67,7 +69,11 @@ export function SetupScene({
       <button className="primary-action" onClick={onStart} type="button">
         祝宴を始める
       </button>
+      {onBack && (
+        <button className="secondary-action" onClick={onBack} type="button">
+          入口へ戻る
+        </button>
+      )}
     </section>
   );
 }
-

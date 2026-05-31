@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readSupabasePublicConfig } from "../../src/online/supabaseClient";
+import { readSupabasePublicConfig } from "../../src/online/supabasePublicConfig";
 
 describe("Supabase public client configuration", () => {
   it("accepts only the project URL and publishable key required by the browser", () => {
@@ -18,5 +18,14 @@ describe("Supabase public client configuration", () => {
     expect(() => readSupabasePublicConfig({})).toThrow(
       "オンライン祝宴の接続設定がありません",
     );
+  });
+
+  it("rejects Docker Compose empty-string defaults as absent configuration", () => {
+    expect(() =>
+      readSupabasePublicConfig({
+        VITE_SUPABASE_URL: "",
+        VITE_SUPABASE_PUBLISHABLE_KEY: "",
+      }),
+    ).toThrow("オンライン祝宴の接続設定がありません");
   });
 });

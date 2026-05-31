@@ -15,7 +15,7 @@ export interface OnlineRoomGateway {
   }): Promise<OnlineRoomSnapshot>;
   startRoom(roomId: string): Promise<OnlineRoomSnapshot>;
   getMyHand(roomId: string): Promise<OnlinePrivateHand>;
-  sealBid(roomId: string, bid: BidValue): Promise<OnlineRoomSnapshot>;
+  sealBid(roomId: string, bid: BidValue, roundIndex: number): Promise<OnlineRoomSnapshot>;
   revealRound(roomId: string): Promise<OnlineRoomSnapshot>;
   advanceRound(roomId: string): Promise<OnlineRoomSnapshot>;
   rematch(roomId: string): Promise<OnlineRoomSnapshot>;
