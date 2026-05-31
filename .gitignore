@@ -11,3 +11,4 @@ test-results/
 supabase/.temp/
 docs/superpowers/
 progress.md
+.vercel

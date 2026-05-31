@@ -11,7 +11,8 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "preview": "vite preview --host 0.0.0.0",
-    "optimize:assets": "node scripts/optimize-assets.mjs"
+    "optimize:assets": "node scripts/optimize-assets.mjs",
+    "prod:preflight": "node scripts/production-preflight.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.106.2",

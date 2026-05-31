@@ -110,6 +110,86 @@ VITE_SUPABASE_PUBLISHABLE_KEY=your_publishable_key
 
 `service_role`、secret API key、合言葉の verifier 値、DB 接続文字列は Vercel のクライアント環境変数へ入れません。Supabase 本番 project の作成・接続、remote migration 適用、Vercel production deploy は本番反映のため、実行前に明示承認を取ります。
 
+### 再現可能な本番手順
+
+本番作業はできるだけ CLI で再実行できる形にします。secret はチャットや git に残さず、実行環境の環境変数として渡します。
+
+```bash
+export SUPABASE_ACCESS_TOKEN=...
+export SUPABASE_PROJECT_REF=...
+export VERCEL_TOKEN=...
+export VERCEL_SCOPE=santa-lab
+export VERCEL_PROJECT=midnight-buffet
+export VITE_SUPABASE_URL=https://your-project.supabase.co
+export VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+docker compose run --rm web npm run prod:preflight
+```
+
+手元で再実行する場合は、同じキーを `.env.production.local` に保存してから次のように読み込みます。このファイルは `.gitignore` 対象です。
+
+```bash
+set -a
+. ./.env.production.local
+set +a
+```
+
+Supabase 本番 project は Authentication > Sign In / Providers で `Allow anonymous sign-ins` を有効化します。オンライン祝宴は匿名ユーザーを authenticated role として扱い、実データアクセスは RLS と Security Definer RPC で制限します。
+
+Supabase migration は、project link 後に次で適用します。
+
+```bash
+docker compose run --rm \
+  -e SUPABASE_ACCESS_TOKEN \
+  supabase-cli link --project-ref "$SUPABASE_PROJECT_REF"
+docker compose run --rm \
+  -e SUPABASE_ACCESS_TOKEN \
+  supabase-cli db push
+```
+
+Vercel は project link と公開可能 env 設定を行ってから production deploy します。
+
+```bash
+docker compose run --rm \
+  -e VERCEL_TOKEN -e VERCEL_SCOPE -e VERCEL_PROJECT \
+  web sh -lc 'npx vercel@54.6.1 link --yes --project "$VERCEL_PROJECT" --scope "$VERCEL_SCOPE" --token "$VERCEL_TOKEN"'
+docker compose run --rm \
+  -e VERCEL_TOKEN -e VERCEL_SCOPE -e VITE_SUPABASE_URL \
+  web sh -lc 'npx vercel@54.6.1 env add VITE_SUPABASE_URL production --value "$VITE_SUPABASE_URL" --force --yes --no-sensitive --scope "$VERCEL_SCOPE" --token "$VERCEL_TOKEN"'
+docker compose run --rm \
+  -e VERCEL_TOKEN -e VERCEL_SCOPE -e VITE_SUPABASE_PUBLISHABLE_KEY \
+  web sh -lc 'npx vercel@54.6.1 env add VITE_SUPABASE_PUBLISHABLE_KEY production --value "$VITE_SUPABASE_PUBLISHABLE_KEY" --force --yes --no-sensitive --scope "$VERCEL_SCOPE" --token "$VERCEL_TOKEN"'
+docker compose run --rm \
+  -e VERCEL_TOKEN -e VERCEL_SCOPE \
+  web sh -lc 'npx vercel@54.6.1 deploy --prod --yes --scope "$VERCEL_SCOPE" --token "$VERCEL_TOKEN"'
+```
+
+GitHub App 連携済みの環境では、link 時に repo 接続も行えます。未連携でも上記の CLI deploy は動作します。
+
+deploy 後は Vercel URL を `PLAYWRIGHT_BASE_URL` に渡して、オンライン E2E と本番オフライン導線を実行します。
+
+```bash
+docker compose run --rm --no-deps \
+  -e PLAYWRIGHT_BASE_URL=https://your-vercel-url.example \
+  e2e sh -lc 'npm ci && npx playwright test e2e/online-room.spec.ts'
+docker compose run --rm --no-deps \
+  -e PLAYWRIGHT_BASE_URL=https://your-vercel-url.example \
+  e2e sh -lc 'npm ci && npx playwright test e2e/pass-and-play.spec.ts --grep-invert "keeps online banquet disabled"'
+```
+
+現在の本番 URL は次です。
+
+```text
+https://midnight-buffet.vercel.app
+```
+
+GitHub App 連携を使う場合の最小形は次です。
+
+```bash
+docker compose run --rm \
+  -e VERCEL_TOKEN -e VERCEL_SCOPE -e VERCEL_PROJECT \
+  web sh -lc 'npx vercel@54.6.1 link --yes --project "$VERCEL_PROJECT" --scope "$VERCEL_SCOPE" --token "$VERCEL_TOKEN"'
+```
+
 ## ドキュメント
 
 - 設計仕様: [`docs/specs/2026-05-26-midnight-buffet-design.md`](docs/specs/2026-05-26-midnight-buffet-design.md)
