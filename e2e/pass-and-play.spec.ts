@@ -1,5 +1,14 @@
 import { expect, test, type Page } from "@playwright/test";
 
+test("keeps online banquet disabled when Supabase config is absent", async ({ page }, testInfo) => {
+  await page.goto("./?qa=offline-only-pages");
+
+  await expect(page.getByRole("button", { name: /この端末で遊ぶ/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /オンライン祝宴/ })).toBeDisabled();
+  await expect(page.getByText("Vercel版で開場予定")).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath("offline-only-entrance.png"), fullPage: true });
+});
+
 test("plays a full short feast without exposing sealed reservations", async ({ page }, testInfo) => {
   test.slow();
   await page.goto("./?qa=initial-release-1");

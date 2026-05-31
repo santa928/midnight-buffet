@@ -71,7 +71,7 @@ docker compose run --rm -e VITE_BASE_PATH=/midnight-buffet/ web npm run build
 docker compose run --rm -p 4174:4173 -e VITE_BASE_PATH=/midnight-buffet/ web npm run preview -- --port 4173
 ```
 
-`test:e2e` は `390x844` と `430x932` のスマートフォン viewport で、ショートゲームの完走、秘密札の非露出、再戦、舞台と手札・CTA の安全余白、横スクロール後の最終札の収まりを実ブラウザ確認します。
+`test:e2e` は `390x844` と `430x932` のスマートフォン viewport で、Supabase 未設定時のオンライン無効表示、ショートゲームの完走、秘密札の非露出、再戦、舞台と手札・CTA の安全余白、横スクロール後の最終札の収まりを実ブラウザ確認します。
 
 `e2e/online-room.spec.ts` は同じ2 viewport で、招待作成、合言葉入場、Realtime 同期、秘密封蝋、幹事公開、再読込後の席復元、オンラインパネルの viewport 収まりを確認します。
 
