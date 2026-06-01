@@ -42,6 +42,15 @@ export function SetupScene({
           <small>約10分</small>
         </button>
       </div>
+      <section className="how-to-panel" aria-labelledby="how-to-title">
+        <h2 id="how-to-title">遊び方</h2>
+        <ol>
+          <li>端末を次の招待客へ渡し、本人だけが手札を開きます。</li>
+          <li>予約札は1回だけ使えます。ショート9皿では1〜9、フル15皿では1〜15を使います。</li>
+          <li>全員が封蝋したらクロッシュを開き、同じ数字は取り合いで無効になります。</li>
+          <li>ごちそうは単独で一番大きい札、厄介皿は単独で一番小さい札が獲得します。</li>
+        </ol>
+      </section>
       <div className="guest-list">
         <p className="section-label">招待客 2〜6人</p>
         {names.map((name, index) => (

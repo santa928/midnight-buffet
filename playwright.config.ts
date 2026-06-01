@@ -5,6 +5,7 @@ export default defineConfig({
   outputDir: "./test-results",
   timeout: 45_000,
   expect: { timeout: 7_000 },
+  workers: 1,
   reporter: "list",
   use: {
     baseURL: process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:5173",
@@ -22,4 +23,3 @@ export default defineConfig({
     },
   ],
 });
-

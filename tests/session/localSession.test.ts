@@ -21,12 +21,12 @@ describe("local pass-and-play session", () => {
     expect(getPublicSnapshot(session).players[0]).not.toHaveProperty("hand");
 
     const choosing = openCurrentHand(session);
-    expect(getPrivateTurn(choosing).remainingBids).toContain(15);
+    expect(getPrivateTurn(choosing).remainingBids).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
   });
 
   it("does not expose a sealed reservation before the reveal", () => {
     let session = createLocalSession({ mode: "short", names: ["あおい", "れん"], shuffle: ordered });
-    session = sealCard(openCurrentHand(session), 15);
+    session = sealCard(openCurrentHand(session), 9);
 
     const betweenGuests = getPublicSnapshot(session);
     expect(session.phase).toBe("handoff");
@@ -40,7 +40,7 @@ describe("local pass-and-play session", () => {
 
   it("reveals the resolved outcome only after every guest has sealed a card", () => {
     let session = createLocalSession({ mode: "short", names: ["あおい", "れん"], shuffle: ordered });
-    session = sealCard(openCurrentHand(session), 15);
+    session = sealCard(openCurrentHand(session), 9);
     session = sealCard(openCurrentHand(session), 8);
     session = revealRound(session);
 
@@ -50,7 +50,7 @@ describe("local pass-and-play session", () => {
     expect(shown.players[0].score).toBe(1);
   });
 
-  it("finishes a short feast after nine revealed rounds", () => {
+  it("keeps the final short feast outcome visible before moving to results", () => {
     let session = createLocalSession({ mode: "short", names: ["あおい", "れん"], shuffle: ordered });
 
     for (let round = 1; round <= 9; round += 1) {
@@ -62,11 +62,15 @@ describe("local pass-and-play session", () => {
       }
     }
 
+    expect(session.phase).toBe("revealed");
+    expect(getPublicSnapshot(session).revealedOutcome?.selections.map(({ bid }) => bid)).toEqual([9, 9]);
+
+    session = advanceRound(session);
     expect(session.phase).toBe("finished");
     expect(getPublicSnapshot(session).rankings?.map(({ rank }) => rank)).toEqual([1, 1]);
   });
 
-  it("finishes a full feast after fifteen revealed rounds", () => {
+  it("keeps the final full feast outcome visible before moving to results", () => {
     let session = createLocalSession({ mode: "full", names: ["あおい", "れん"], shuffle: ordered });
 
     for (let round = 1; round <= 15; round += 1) {
@@ -78,6 +82,8 @@ describe("local pass-and-play session", () => {
       }
     }
 
+    expect(session.phase).toBe("revealed");
+    session = advanceRound(session);
     expect(session.phase).toBe("finished");
     expect(getPublicSnapshot(session).roundNumber).toBe(15);
     expect(getPublicSnapshot(session).dishCount).toBe(15);
@@ -85,14 +91,14 @@ describe("local pass-and-play session", () => {
 
   it("resets hands, scores and private choices for a rematch", () => {
     let session = createLocalSession({ mode: "short", names: ["あおい", "れん"], shuffle: ordered });
-    session = sealCard(openCurrentHand(session), 15);
+    session = sealCard(openCurrentHand(session), 9);
     session = sealCard(openCurrentHand(session), 1);
     session = revealRound(session);
 
     const replay = rematchSession(session, ordered);
 
     expect(replay.phase).toBe("handoff");
-    expect(replay.game.players[0].remainingBids).toHaveLength(15);
+    expect(replay.game.players[0].remainingBids).toHaveLength(9);
     expect(replay.game.players[0].score).toBe(0);
     expect(getPublicSnapshot(replay).revealedOutcome).toBeUndefined();
   });
@@ -105,7 +111,7 @@ describe("local pass-and-play session", () => {
     });
 
     adapter.openCurrentHand();
-    adapter.sealCard(15);
+    adapter.sealCard(9);
 
     expect(adapter.getSnapshot().phase).toBe("handoff");
     expect(adapter.getSnapshot().revealedOutcome).toBeUndefined();

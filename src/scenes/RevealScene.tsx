@@ -38,6 +38,7 @@ export function RevealScene({
     return <></>;
   }
   const winner = snapshot.players.find((player) => player.id === outcome.winnerId);
+  const advanceLabel = snapshot.currentDish ? "次の皿へ" : "結果を見る";
 
   return (
     <>
@@ -53,10 +54,9 @@ export function RevealScene({
         </div>
         <ScoreBoard players={snapshot.players} />
         <button className="primary-action" onClick={onAdvance} type="button">
-          次の皿へ
+          {advanceLabel}
         </button>
       </section>
     </>
   );
 }
-

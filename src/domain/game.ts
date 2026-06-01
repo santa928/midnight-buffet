@@ -18,7 +18,7 @@ export function createGame(
   shuffle?: DishShuffler,
 ): GameState {
   const dishes = createDishDeck(mode, shuffle);
-  const players = names.map((name, index) => createPlayer(name, index));
+  const players = names.map((name, index) => createPlayer(name, index, mode));
 
   return {
     mode,
@@ -72,11 +72,11 @@ export function rematch(state: GameState, shuffle?: DishShuffler): GameState {
 }
 
 /** Creates initial state for one invited guest. */
-function createPlayer(name: string, index: number): PlayerState {
+function createPlayer(name: string, index: number, mode: GameMode): PlayerState {
   return {
     id: `player-${index + 1}`,
     name,
-    remainingBids: createBidCards(),
+    remainingBids: createBidCards(mode),
     capturedDishes: [],
     score: 0,
   };

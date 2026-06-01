@@ -3,8 +3,9 @@ import type { BidValue, Dish, GameMode } from "./types";
 type Shuffler<T> = (values: T[]) => T[];
 
 /** Creates the shared hand of one-use numbered reservation cards. */
-export function createBidCards(): BidValue[] {
-  return Array.from({ length: 15 }, (_, index) => index + 1);
+export function createBidCards(mode: GameMode = "full"): BidValue[] {
+  const cardCount = mode === "short" ? 9 : 15;
+  return Array.from({ length: cardCount }, (_, index) => index + 1);
 }
 
 /** Creates the selected feast's dishes in a shuffled order. */

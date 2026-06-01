@@ -9,6 +9,29 @@ test("keeps online banquet disabled when Supabase config is absent", async ({ pa
   await page.screenshot({ path: testInfo.outputPath("offline-only-entrance.png"), fullPage: true });
 });
 
+test("keeps local setup instructions and actions inside the viewport", async ({ page }, testInfo) => {
+  await page.goto("./?qa=setup-layout");
+  await page.getByRole("button", { name: /この端末で遊ぶ/ }).click();
+  await expect(page.getByRole("heading", { name: "遊び方" })).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath("setup-layout.png"), fullPage: true });
+
+  const start = await page.getByRole("button", { name: "祝宴を始める" }).boundingBox();
+  const back = await page.getByRole("button", { name: "入口へ戻る" }).boundingBox();
+  const viewport = page.viewportSize();
+  const hasHorizontalOverflow = await page.evaluate(
+    () => document.documentElement.scrollWidth > window.innerWidth,
+  );
+
+  expect(start).not.toBeNull();
+  expect(back).not.toBeNull();
+  expect(viewport).not.toBeNull();
+  if (!start || !back || !viewport) return;
+
+  expect(start.y + start.height).toBeLessThanOrEqual(viewport.height - 8);
+  expect(back.y + back.height).toBeLessThanOrEqual(viewport.height - 4);
+  expect(hasHorizontalOverflow).toBe(false);
+});
+
 test("plays a full short feast without exposing sealed reservations", async ({ page }, testInfo) => {
   test.slow();
   await page.goto("./?qa=initial-release-1");
@@ -18,28 +41,31 @@ test("plays a full short feast without exposing sealed reservations", async ({ p
   await page.getByRole("button", { name: "祝宴を始める" }).click();
 
   await expect(page.getByText("次は あおい さん")).toBeVisible();
-  await expect(page.getByRole("button", { name: "予約札 15" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "予約札 9" })).toHaveCount(0);
 
   for (let round = 0; round < 9; round += 1) {
-    await chooseCard(page, 15 - round);
+    await chooseCard(page, 9 - round);
     await expect(page.getByText("次は れん さん")).toBeVisible();
-    await expect(page.getByRole("button", { name: `予約札 ${15 - round}`, exact: true })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: `予約札 ${9 - round}`, exact: true })).toHaveCount(0);
     await chooseCard(page, 1 + round);
     await expect(page.getByRole("button", { name: "クロッシュを開ける" })).toBeVisible();
 
-    await page.getByRole("button", { name: "クロッシュを開ける" }).click();
+    await clickVisibleButton(page, "クロッシュを開ける");
     if (round === 0) {
       await page.screenshot({ path: testInfo.outputPath("reveal.png"), fullPage: true });
     }
     if (round < 8) {
-      await page.getByRole("button", { name: "次の皿へ" }).click();
+      await clickVisibleButton(page, "次の皿へ");
+    } else {
+      await expect(page.getByText(/さんが獲得|この皿は未配膳/)).toBeVisible();
+      await clickVisibleButton(page, "結果を見る");
     }
   }
 
   await expect(page.getByText("今宵の表彰")).toBeVisible();
   await expect(page.getByRole("button", { name: "もう一度乾杯" })).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath("results.png"), fullPage: true });
-  await page.getByRole("button", { name: "もう一度乾杯" }).click();
+  await clickVisibleButton(page, "もう一度乾杯");
   await expect(page.getByText("次は あおい さん")).toBeVisible();
 });
 
@@ -56,7 +82,8 @@ test("keeps the dish stage and private controls separated inside the viewport", 
   const hand = await page.getByTestId("card-hand").boundingBox();
   const cta = await page.getByTestId("primary-cta").boundingBox();
   const viewport = page.viewportSize();
-  const lastCard = page.getByRole("button", { name: "予約札 15", exact: true });
+  const lastCard = page.getByRole("button", { name: "予約札 9", exact: true });
+  const firstCard = page.getByRole("button", { name: "予約札 1", exact: true });
 
   expect(stage).not.toBeNull();
   expect(hand).not.toBeNull();
@@ -77,17 +104,46 @@ test("keeps the dish stage and private controls separated inside the viewport", 
     expect(visibleLastCard.x).toBeGreaterThanOrEqual(8);
     expect(visibleLastCard.x + visibleLastCard.width).toBeLessThanOrEqual(viewport.width - 8);
     expect(visibleLastCard.y + visibleLastCard.height).toBeLessThanOrEqual(cta.y - 8);
+    expect(visibleLastCard.height).toBeGreaterThanOrEqual(88);
   }
+
+  await expectCardCenterReceivesPointer(page, firstCard, "予約札 1");
+  await expectCardCenterReceivesPointer(page, lastCard, "予約札 9");
 });
 
 async function chooseCard(page: Page, value: number): Promise<void> {
   await openHand(page);
-  await page.getByRole("button", { name: `予約札 ${value}`, exact: true }).click();
-  await page.getByRole("button", { name: "この札を封蝋する" }).click();
+  await clickVisibleButton(page, `予約札 ${value}`);
+  await clickVisibleButton(page, "この札を封蝋する");
 }
 
 async function openHand(page: Page): Promise<void> {
-  const curtainButton = page.getByRole("button", { name: "長押しして手札を開く" });
-  await curtainButton.dispatchEvent("pointerdown", { pointerId: 1, pointerType: "touch" });
+  await clickVisibleButton(page, "手札を開く");
   await expect(page.getByTestId("card-hand")).toBeVisible();
+}
+
+async function clickVisibleButton(page: Page, name: string): Promise<void> {
+  const button = page.getByRole("button", { name, exact: true });
+  await expect(button).toBeVisible();
+  await button.dispatchEvent("click");
+}
+
+async function expectCardCenterReceivesPointer(
+  page: Page,
+  card: ReturnType<Page["getByRole"]>,
+  label: string,
+): Promise<void> {
+  await card.scrollIntoViewIfNeeded();
+  const box = await card.boundingBox();
+  expect(box).not.toBeNull();
+  if (!box) return;
+
+  const hitLabel = await page.evaluate(
+    ({ x, y }) => {
+      const target = document.elementFromPoint(x, y);
+      return target?.closest("button")?.textContent?.replace(/\s+/g, " ").trim() ?? "";
+    },
+    { x: box.x + box.width / 2, y: box.y + box.height / 2 },
+  );
+  expect(hitLabel).toContain(label.replace("予約札 ", ""));
 }

@@ -77,7 +77,7 @@ export function revealRound(session: LocalSessionState): LocalSessionState {
   return {
     ...session,
     game,
-    phase: game.finished ? "finished" : "revealed",
+    phase: "revealed",
     revealedOutcome,
   };
 }
@@ -89,7 +89,7 @@ export function advanceRound(session: LocalSessionState): LocalSessionState {
   }
   return {
     ...session,
-    phase: "handoff",
+    phase: session.game.finished ? "finished" : "handoff",
     currentPlayerIndex: 0,
     pendingSelections: [],
     revealedOutcome: undefined,

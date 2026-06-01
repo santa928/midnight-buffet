@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { cleanup } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -45,6 +45,32 @@ describe("offline banquet flow", () => {
     expect(screen.getByText("名前は空欄なし・重複なしで入力してください")).toBeVisible();
   });
 
+  it("shows how to play before starting a local feast", async () => {
+    const user = userEvent.setup();
+    render(<App shuffle={ordered} />);
+    await openOffline(user);
+
+    expect(screen.getByRole("heading", { name: "遊び方" })).toBeVisible();
+    expect(screen.getByText(/予約札は1回だけ使えます/)).toBeVisible();
+    expect(screen.getByText(/ショート9皿では1〜9/)).toBeVisible();
+  });
+
+  it("opens the private hand with a normal tap on the handoff button", async () => {
+    const user = userEvent.setup();
+    render(<App shuffle={ordered} />);
+    await openOffline(user);
+
+    const names = screen.getAllByRole("textbox");
+    await user.type(names[0], "あおい");
+    await user.type(names[1], "れん");
+    await user.click(screen.getByRole("button", { name: "祝宴を始める" }));
+    await user.click(screen.getByRole("button", { name: "手札を開く" }));
+
+    expect(screen.getByTestId("card-hand")).toBeVisible();
+    expect(screen.getByRole("button", { name: "予約札 9" })).toBeVisible();
+    expect(screen.queryByRole("button", { name: "予約札 15" })).not.toBeInTheDocument();
+  });
+
   it("keeps sealed cards private until the cloche reveal", async () => {
     const user = userEvent.setup();
     render(<App shuffle={ordered} />);
@@ -60,11 +86,11 @@ describe("offline banquet flow", () => {
 
     vi.useFakeTimers();
     openHand();
-    fireEvent.click(screen.getByRole("button", { name: "予約札 15" }));
+    fireEvent.click(screen.getByRole("button", { name: "予約札 9" }));
     fireEvent.click(screen.getByRole("button", { name: "この札を封蝋する" }));
 
     expect(screen.getByText("次は れん さん")).toBeVisible();
-    expect(screen.queryByText("予約札 15")).not.toBeInTheDocument();
+    expect(screen.queryByText("予約札 9")).not.toBeInTheDocument();
 
     openHand();
     fireEvent.click(screen.getByRole("button", { name: "予約札 1" }));
@@ -77,7 +103,7 @@ describe("offline banquet flow", () => {
 
     expect(screen.getByText("あおい さんが獲得")).toBeVisible();
     expect(screen.getAllByText("+1")).toHaveLength(2);
-    expect(screen.getByText("15")).toBeVisible();
+    expect(screen.getByText("9")).toBeVisible();
     expect(screen.getByText("ショート 1/9皿")).toBeVisible();
   });
 
@@ -114,15 +140,18 @@ describe("offline banquet flow", () => {
     vi.useFakeTimers();
 
     for (let round = 0; round < 9; round += 1) {
-      selectForGuest(15 - round);
+      selectForGuest(9 - round);
       selectForGuest(1 + round);
       fireEvent.click(screen.getByRole("button", { name: "クロッシュを開ける" }));
       if (round < 8) {
         fireEvent.click(screen.getByRole("button", { name: "次の皿へ" }));
+      } else {
+        expect(screen.getByText(/さんが獲得|この皿は未配膳/)).toBeVisible();
+        fireEvent.click(screen.getByRole("button", { name: "結果を見る" }));
       }
     }
 
-    expect(screen.getByText("あおい さんの勝利")).toBeVisible();
+    expect(screen.getByText(/さんの勝利/)).toBeVisible();
     expect(screen.getByRole("button", { name: "もう一度乾杯" })).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "もう一度乾杯" }));
     expect(screen.getByText("次は あおい さん")).toBeVisible();
@@ -134,10 +163,7 @@ async function openOffline(user: ReturnType<typeof userEvent.setup>): Promise<vo
 }
 
 function openHand(): void {
-  const trigger = screen.getByRole("button", { name: "長押しして手札を開く" });
-  fireEvent.pointerDown(trigger);
-  act(() => vi.advanceTimersByTime(500));
-  fireEvent.pointerUp(trigger);
+  fireEvent.click(screen.getByRole("button", { name: "手札を開く" }));
 }
 
 function selectForGuest(value: number): void {

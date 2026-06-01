@@ -17,12 +17,12 @@ describe("game lifecycle", () => {
     const game = createGame("short", ["あおい", "れん"], ordered);
 
     const next = playRound(game, [
-      { playerId: game.players[0].id, bid: 15 },
+      { playerId: game.players[0].id, bid: 9 },
       { playerId: game.players[1].id, bid: 2 },
     ]);
 
     expect(next.players[0].score).toBe(1);
-    expect(next.players[0].remainingBids).not.toContain(15);
+    expect(next.players[0].remainingBids).not.toContain(9);
     expect(next.players[1].remainingBids).not.toContain(2);
     expect(next.currentDish?.points).toBe(2);
   });
@@ -30,14 +30,14 @@ describe("game lifecycle", () => {
   it("prevents a guest from reusing a sealed reservation card", () => {
     const game = createGame("short", ["あおい", "れん"], ordered);
     const once = playRound(game, [
-      { playerId: game.players[0].id, bid: 15 },
-      { playerId: game.players[1].id, bid: 14 },
+      { playerId: game.players[0].id, bid: 9 },
+      { playerId: game.players[1].id, bid: 8 },
     ]);
 
     expect(() =>
       playRound(once, [
-        { playerId: once.players[0].id, bid: 15 },
-        { playerId: once.players[1].id, bid: 13 },
+        { playerId: once.players[0].id, bid: 9 },
+        { playerId: once.players[1].id, bid: 7 },
       ]),
     ).toThrow("使用済みの予約札です");
   });
@@ -61,13 +61,13 @@ describe("game lifecycle", () => {
   it("starts a rematch with fresh hands and no captured dishes", () => {
     const game = createGame("short", ["あおい", "れん"], ordered);
     const scored = playRound(game, [
-      { playerId: game.players[0].id, bid: 15 },
+      { playerId: game.players[0].id, bid: 9 },
       { playerId: game.players[1].id, bid: 1 },
     ]);
 
     const replay = rematch(scored, ordered);
 
-    expect(replay.players[0].remainingBids).toHaveLength(15);
+    expect(replay.players[0].remainingBids).toHaveLength(9);
     expect(replay.players[0].score).toBe(0);
     expect(replay.history).toEqual([]);
     expect(replay.currentDish?.points).toBe(1);
